@@ -1,0 +1,94 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: kenzo
+#=================================================
+
+name: Lienol_ghl-r-001
+
+on:
+  # release:
+    # types: [published]
+    
+   push:
+     branches: 
+       - main
+      
+  # schedule:
+    # - cron: 0 8 * * 5
+  
+  # watch:
+    # types: [started]
+
+jobs:
+  build:
+    runs-on: Ubuntu-20.04
+
+    steps:
+    - name: 检查
+      uses: actions/checkout@master
+
+    - name: 初始化环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "Asia/Shanghai"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+    - name: 克隆源代码
+      env: 
+        REPO_URL: https://github.com/Lienol/openwrt
+        REPO_BRANCH: 19.07
+      
+      run: |
+        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        cd openwrt
+        sed -i '5s/#//' feeds.conf.default
+        
+    - name: 更新 & 安装 feeds
+      working-directory: ./openwrt
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        ./scripts/feeds install -a
+    - name: 自定义安装源
+      working-directory: ./openwrt
+      run: |
+        git clone https://github.com/xiaorouji/openwrt-passwall package/openwrt-passwall
+        
+    - name: 自定义配置文件Lienol
+      env:
+        CONFIG_FILE: 'ghl-r-001.config'
+      run: |
+        [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
+        chmod +x ./customize.sh && ./customize.sh
+        make defconfig
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        
+    - name: 下载包文件
+      working-directory: ./openwrt
+      run: |
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+    - name: 编译固件
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s       
+    - name : 上传固件
+      uses: actions/upload-artifact@master
+      with:
+        name: Lienol-ghl-r-001
+        path: openwrt/bin
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        retain_days: 1
+        keep_minimum_runs: 3
