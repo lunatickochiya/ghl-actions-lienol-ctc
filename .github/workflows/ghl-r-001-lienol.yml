@@ -10,15 +10,18 @@ on:
   # release:
     # types: [published]
     
-   push:
-     branches: 
-       - main
+  push:
+    branches:
+      - main
+    paths:
+      - 'startcompileall'
       
   # schedule:
     # - cron: 0 8 * * 5
   
   # watch:
     # types: [started]
+
 
 jobs:
   build:
@@ -69,7 +72,7 @@ jobs:
       run: |
         [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
-        make defconfig
+        make defconfig V=s
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         
