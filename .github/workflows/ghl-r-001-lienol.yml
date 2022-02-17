@@ -90,8 +90,50 @@ jobs:
     - name : 上传固件
       uses: actions/upload-artifact@master
       with:
-        name: Lienol-ghl-r-001
+        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
+
+    - name: 整理文件
+      id: organize
+      run: |
+        mkdir firmware
+        mv -f openwrt/bin/targets/*/*/{*combined*,*sysupgrade*} ./firmware/ 2>/dev/null || true
+        cd firmware
+        echo "v${{ env.date4 }}" > version.txt
+        md5=$((md5sum *squashfs-sysupgrade* || md5sum *squashfs-combined-efi*) | awk '{print $1}') 2>/dev/null
+        echo $md5 >> version.txt
+        rename -v "s/^immortalwrt/${{ env.VERSION }}-openwrt/" * || true
+        rename -v "s/friendlyarm_//" *gz || true
+        echo $md5 >> version.txt  
+        rm -rf sha256sums
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+            
+      
+    - name: 上传固件目录
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: ${{ env.date3 }}
+        path: ${{ env.FIRMWARE }}
+        
+    - name: 生成标签
+      id: tag
+      run: |
+        echo -e "加速下载 🎈:\n" >> release.txt
+        echo -e "lunatickochiya)\n" >> release.txt
+        touch release.txt
+        echo "::set-output name=status::success"
+        
+    - name: 上传固件发布
+      uses: softprops/action-gh-release@v1
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      env:
+        GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+      with:
+        files: "${{ env.FIRMWARE }}/*"
+        name: ${{ env.date2 }} ${{matrix.target}}
+        tag_name: ${{ env.date }}_${{matrix.target}}
+        body_path: release.txt
         
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
