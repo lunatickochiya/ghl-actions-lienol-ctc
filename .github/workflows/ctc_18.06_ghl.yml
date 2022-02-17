@@ -14,7 +14,7 @@ on:
     branches:
       - main
     paths:
-      - 'startcompileall'
+      - 'startcompilectc'
       
   # schedule:
     # - cron: 0 8 * * 5
