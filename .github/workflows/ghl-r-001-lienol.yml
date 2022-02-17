@@ -54,17 +54,16 @@ jobs:
         cd openwrt
         sed -i '5s/#//' feeds.conf.default
         
+    - name: 自定义安装源
+      working-directory: ./openwrt
+      run: |
+        git clone https://github.com/xiaorouji/openwrt-passwall package/openwrt-passwall
+        
     - name: 更新 & 安装 feeds
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        ./scripts/feeds install -a
-
-    - name: 自定义安装源
-      working-directory: ./openwrt
-      run: |
-        git clone https://github.com/xiaorouji/openwrt-passwall package/openwrt-passwall
         
     - name: 自定义配置文件Lienol
       env:
@@ -73,8 +72,6 @@ jobs:
         [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
         make defconfig V=s
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
         
     - name: 下载包文件
       working-directory: ./openwrt
