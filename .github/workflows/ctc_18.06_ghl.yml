@@ -10,9 +10,11 @@ on:
   # release:
     # types: [published]
     
-   push:
-     branches: 
-       - main
+  push:
+    branches:
+      - main
+    paths:
+      - 'startcompileall'
       
   # schedule:
     # - cron: 0 8 * * 5
@@ -55,7 +57,7 @@ jobs:
       run: |
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        ./scripts/feeds install -a
+        
     - name: 自定义安装源
       working-directory: ./openwrt
       run: |
@@ -67,9 +69,7 @@ jobs:
       run: |
         [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
-        make defconfig
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
+        make defconfig V=s
         
     - name: 下载包文件
       working-directory: ./openwrt
@@ -77,16 +77,19 @@ jobs:
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+        
     - name: 编译固件
       working-directory: ./openwrt
       run: |
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s       
+        
     - name : 上传固件
       uses: actions/upload-artifact@master
       with:
         name: Lienol-ghl-r-001
         path: openwrt/bin
+        
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
       with:
