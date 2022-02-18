@@ -79,7 +79,7 @@ jobs:
         
     - name: 自定义配置文件Lienol
       env:
-        CONFIG_FILE: 'ghl-r-001-lienol.config'
+        CONFIG_FILE: 'ghl-r-001-419.config'
       run: |
         [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
