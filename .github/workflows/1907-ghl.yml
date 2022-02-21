@@ -4,7 +4,7 @@
 # Author: kenzo
 #=================================================
 
-name: 419_ghl-r-001
+name: 1907_ghl-r-001
 
 on:
   # release:
@@ -58,8 +58,8 @@ jobs:
         
     - name: 克隆源代码
       env: 
-        REPO_URL: https://github.com/LGA1150/openwrt
-        REPO_BRANCH: ramips-4.19-20191217
+        REPO_URL: https://github.com/openwrt/openwrt
+        REPO_BRANCH: openwrt-19.07
       
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
@@ -79,7 +79,7 @@ jobs:
         
     - name: 自定义配置文件Lienol
       env:
-        CONFIG_FILE: 'ghl-r-001-419.config'
+        CONFIG_FILE: 'ghl1907.config'
       run: |
         [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
