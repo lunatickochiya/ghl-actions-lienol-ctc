@@ -14,7 +14,7 @@ on:
     branches:
       - main
     paths:
-      - 'startcompile419'
+      - 'startcompile1907'
       - 'startcompileall'
       
   # schedule:
