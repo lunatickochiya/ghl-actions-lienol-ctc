@@ -4,7 +4,7 @@
 # Author: kenzo
 #=================================================
 
-name: 1907_ghl-r-001
+name: lean_ghl-r-001
 
 on:
   # release:
@@ -62,6 +62,7 @@ jobs:
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
+        git checkout c1941e154bfeafb4c67bb06c46ea07f8c8ea4e7d
         sed -i '5s/#//' feeds.conf.default
         
     - name: 自定义安装源
