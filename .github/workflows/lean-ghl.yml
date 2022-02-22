@@ -68,7 +68,7 @@ jobs:
       working-directory: ./openwrt
       run: |
         git clone https://github.com/xiaorouji/openwrt-passwall package/openwrt-passwall
-        git checkout c1941e154bfeafb4c67bb06c46ea07f8c8ea4e7d
+        git checkout 7bd0d56834062e27f6d3cf1978d8f20e982cda76
         
     - name: 更新 & 安装 feeds
       working-directory: ./openwrt
